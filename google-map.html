@@ -1,9 +1,9 @@
 <!-- Copyright (c) 2015 Google Inc. All rights reserved. -->
 
-<link rel="import" href="../polymer/polymer.html">
-<link rel="import" href="../google-apis/google-maps-api.html">
-<link rel="import" href="../iron-resizable-behavior/iron-resizable-behavior.html">
-<link rel="import" href="../iron-selector/iron-selector.html">
+<link rel="import" href="bower_components/polymer/polymer.html">
+<link rel="import" href="bower_components/google-apis/google-maps-api.html">
+<link rel="import" href="bower_components/iron-resizable-behavior/iron-resizable-behavior.html">
+<link rel="import" href="bower_components/iron-selector/iron-selector.html">
 <link rel="import" href="google-map-marker.html">
 <!--
 The `google-map` element renders a Google Map.
@@ -80,13 +80,13 @@ If you're seeing the message "You have included the Google Maps API multiple tim
   <template>
 
     <google-maps-api id="api"
-      api-key="[[apiKey]]"
-      client-id="[[clientId]]"
-      version="[[version]]"
-      signed-in="[[signedIn]]"
-      language="[[language]]"
-      on-api-load="_mapApiLoaded"
-      maps-url="[[mapsUrl]]"></google-maps-api>
+                     api-key="[[apiKey]]"
+                     client-id="[[clientId]]"
+                     version="[[version]]"
+                     signed-in="[[signedIn]]"
+                     language="[[language]]"
+                     on-api-load="_mapApiLoaded"
+                     maps-url="[[mapsUrl]]"></google-maps-api>
 
     <div id="map"></div>
 
@@ -157,7 +157,7 @@ If you're seeing the message "You have included the Google Maps API multiple tim
     /**
      * Fired when the map becomes idle after panning or zooming.
      * @event google-map-idle
-    */
+     */
 
     /**
      * Polymer properties for the google-map custom element.
@@ -299,6 +299,10 @@ If you're seeing the message "You have included the Google Maps API multiple tim
         type: Boolean,
         value: false,
         observer: '_disableZoomChanged'
+      },
+      moreContrast: {
+        type: Boolean,
+        value: false
       },
 
       /**
@@ -469,6 +473,77 @@ If you're seeing the message "You have included the Google Maps API multiple tim
     },
 
     _getMapOptions: function() {
+      var mystyles;
+      if(this.moreContrast == true){
+        console.log('more contrast');
+        mystyles = [{
+          featureType: 'water',
+          stylers: [
+            {'color': '#004d99'}
+          ]},{
+          featureType: 'landscape',
+          stylers: [
+            {'color': '#000000'}
+          ]},{
+          featureType: 'road',
+          stylers: [
+            {'color': '#ffffff'}
+          ]},{
+          featureType: 'road',
+          elementType: 'labels.text.stroke',
+          stylers: [
+            {'color': '#00cc00'}
+          ]},{
+          featureType: 'road',
+          elementType: 'labels.text.fill',
+          stylers: [
+            {'color': '#000000'}
+          ]},{
+          featureType: 'transit',
+          stylers: [
+            {'color': '#ffffff' }
+          ]},{
+          featureType: 'poi',
+          stylers: [
+            {'visibility': 'off'}
+          ]},{
+          featureType: 'administrative',
+          elementType: 'labels.text.stroke',
+          stylers: [
+            {'color': '#ffff00'}
+          ]},{
+          featureType: 'administrative',
+          elementType: 'labels.text.fill',
+          stylers: [
+            {'color': '#000000'}
+          ]},{
+          featureType: 'transit',
+          elementType: 'labels.text.stroke',
+          stylers: [
+            {'color': '#ff6666'}
+          ]},{
+          featureType: 'transit',
+          elementType: 'labels.text.fill',
+          stylers: [
+            {'color': '#000000'}
+          ]},{
+          featureType: 'transit',
+          elementType: 'labels.icon',
+          stylers: [
+            {'color': '#ff6666'}
+          ]},{
+          featureType: 'transit',
+          elementType: 'labels.text.stroke',
+          stylers: [
+            {'color': '#000000'}
+          ]}
+        ];
+        console.log(mystyles);
+      }
+      else {
+        mystyles = this.styles;
+        console.log("not more Contrast");
+      }
       var mapOptions = {
         zoom: this.zoom,
         tilt: this.noAutoTilt ? 0 : 45,
@@ -478,7 +553,7 @@ If you're seeing the message "You have included the Google Maps API multiple tim
         streetViewControl: !this.disableDefaultUi && !this.disableStreetViewControl,
         disableDoubleClickZoom: this.disableZoom,
         scrollwheel: !this.disableZoom,
-        styles: this.styles,
+        styles: mystyles,
         maxZoom: Number(this.maxZoom),
         minZoom: Number(this.minZoom)
       };
@@ -513,7 +588,7 @@ If you're seeing the message "You have included the Google Maps API multiple tim
 
     _updateMarkers: function() {
       var newMarkers = Array.prototype.slice.call(
-          Polymer.dom(this.$.markers).getDistributedNodes());
+              Polymer.dom(this.$.markers).getDistributedNodes());
 
       // do not recompute if markers have not been added or removed
       if (newMarkers.length === this.markers.length) {
@@ -553,7 +628,7 @@ If you're seeing the message "You have included the Google Maps API multiple tim
 
     _updateObjects: function() {
       var newObjects = Array.prototype.slice.call(
-          Polymer.dom(this.$.objects).getDistributedNodes());
+              Polymer.dom(this.$.objects).getDistributedNodes());
 
       // Do not recompute if objects have not been added or removed.
       if (newObjects.length === this.objects.length) {
@@ -774,7 +849,7 @@ If you're seeing the message "You have included the Google Maps API multiple tim
         var latLngBounds = new google.maps.LatLngBounds();
         for (var i = 0, m; m = this.markers[i]; ++i) {
           latLngBounds.extend(
-              new google.maps.LatLng(m.latitude, m.longitude));
+                  new google.maps.LatLng(m.latitude, m.longitude));
         }
 
         // For one marker, don't alter zoom, just center it.
@@ -820,17 +895,17 @@ If you're seeing the message "You have included the Google Maps API multiple tim
       }.bind(this));
     },
 
-   _deselectMarker: function(e, detail) {
-     // If singleInfoWindow is set, update iron-selector's selected attribute to be null.
-     // Else remove the marker from iron-selector's selected array.
-     var markerIndex = this.$.selector.indexOf(e.target);
+    _deselectMarker: function(e, detail) {
+      // If singleInfoWindow is set, update iron-selector's selected attribute to be null.
+      // Else remove the marker from iron-selector's selected array.
+      var markerIndex = this.$.selector.indexOf(e.target);
 
-     if (this.singleInfoWindow) {
-      this.$.selector.selected = null;
-     } else if (this.$.selector.selectedValues) {
-      this.$.selector.selectedValues = this.$.selector.selectedValues.filter(function(i) {return i !== markerIndex});
-     }
-   }
+      if (this.singleInfoWindow) {
+        this.$.selector.selected = null;
+      } else if (this.$.selector.selectedValues) {
+        this.$.selector.selectedValues = this.$.selector.selectedValues.filter(function(i) {return i !== markerIndex});
+      }
+    }
 
   });
 
