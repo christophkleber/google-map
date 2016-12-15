@@ -315,6 +315,9 @@ If you're seeing the message "You have included the Google Maps API multiple tim
                 type: String,
                 value: 'ltr'
             },
+            textAlternatives: {
+                type: String
+            },
 
             /**
              * If set, custom styles can be applied to the map.
@@ -476,9 +479,12 @@ If you're seeing the message "You have included the Google Maps API multiple tim
             this._updateMarkers();
             this._updateObjects();
             this._addMapListeners();
+            this._changeTextAlternatives();
+
             this._changeFontSize();
             this._changeFontStyle();
             this._changeReadingDirection();
+
 
 
             this.fire('google-map-ready');
@@ -827,8 +833,13 @@ If you're seeing the message "You have included the Google Maps API multiple tim
                         break;
                     case 'rtl':
                         console.log('rtl');
+                        //Streetview, Zoom Settings
+                        document.querySelector('.gmnoprint.gm-bundled-control.gm-bundled-control-on-bottom').style.right = 'auto';
+                        document.querySelector('.gmnoprint.gm-bundled-control.gm-bundled-control-on-bottom + .gmnoprint').style.left = 0 + 'px';
+                        //Card, Satellite Settings
                         document.querySelector('.gmnoprint.gm-bundled-control.gm-bundled-control-on-bottom + .gmnoprint').style.left = 'auto';
                         document.querySelector('.gmnoprint.gm-bundled-control.gm-bundled-control-on-bottom + .gmnoprint').style.right = 0 + 'px';
+
                         break;
                 }
             }.bind(this));
@@ -987,6 +998,14 @@ If you're seeing the message "You have included the Google Maps API multiple tim
                 document.querySelector('#map .gmnoprint .gm-style-cc div a + span').style.fontSize = smallText + 'px';
                 document.querySelector('#map .gmnoprint.gm-style-cc div a').style.fontSize = smallText + 'px';
                 document.querySelectorAll('#map .gm-style-cc div a')[2].style.fontSize = smallText + 'px';
+                // Zoom Controls
+                var zoomTexts = document.querySelectorAll('.text');
+                console.log(zoomTexts);
+                for (i = 0; i < zoomTexts.length; i++) {
+                    console.log('nummer:' +i);
+                    zoomTexts[i].style.fontSize = bigText + 'px';
+                }
+
 
                 console.log('changedFontSize');
 
@@ -1008,6 +1027,11 @@ If you're seeing the message "You have included the Google Maps API multiple tim
                     document.querySelector('#map .gmnoprint .gm-style-cc div a + span').style.fontFamily = '"Times New Roman", Roboto, Arial, sans-serif';
                     document.querySelector('#map .gmnoprint.gm-style-cc div a').style.fontFamily = '"Times New Roman", Roboto, Arial, sans-serif';
                     document.querySelectorAll('#map .gm-style-cc div a')[2].style.fontFamily  = '"Times New Roman", Roboto, Arial, sans-serif';
+                    var texts = document.querySelectorAll('.text');
+
+                    for (i = 0; i < texts.length; i++) {
+                        texts[i].style.fontFamily = '"Times New Roman", Roboto, Arial, sans-serif';
+                    }
                 }
 
             }.bind(this));
@@ -1025,6 +1049,10 @@ If you're seeing the message "You have included the Google Maps API multiple tim
                         break;
                     case 'rtl':
                         console.log('rtl');
+                        //Streetview, Zoom Settings
+                        document.querySelector('.gmnoprint.gm-bundled-control.gm-bundled-control-on-bottom').style.right = 'auto';
+                        document.querySelector('.gmnoprint.gm-bundled-control.gm-bundled-control-on-bottom + .gmnoprint').style.left = 0 + 'px';
+                        //Card, Satellite Settings
                         document.querySelector('.gmnoprint.gm-bundled-control.gm-bundled-control-on-bottom + .gmnoprint').style.left = 'auto';
                         document.querySelector('.gmnoprint.gm-bundled-control.gm-bundled-control-on-bottom + .gmnoprint').style.right = 0 + 'px';
                         break;
@@ -1032,9 +1060,79 @@ If you're seeing the message "You have included the Google Maps API multiple tim
 
             }.bind(this));
 
+        },
+        /**
+         * _changeTextAlternatives - Changes the web components texts or symbols
+         *                   depending on textAlternatives(symbol, text)
+         *
+         */
+        _changeTextAlternatives: function () {
+            google.maps.event.addListenerOnce(this.map, 'tilesloaded', function(){
+                switch (this.textAlternatives) {
+                    case 'symbol':
+                        console.log('symbol');
+                        // Card and Satellite Text
+                        document.querySelectorAll('#map .gmnoprint .gm-style-mtc > div:first-child')[0].innerHTML = '<i class="fa fa-map"></i>';
+                        document.querySelectorAll('#map .gmnoprint .gm-style-mtc > div:first-child')[1].innerHTML = '<i class="fa fa-globe"></i>';
+                        break;
+                    case 'text':
+                        console.log('text');
+                        if(this.readingDirection == 'ltr'){
+                            document.querySelector('.gmnoprint.gm-bundled-control.gm-bundled-control-on-bottom').style.right = '105px';
+
+                        }
+
+                        var gmnoprintWrapper = document.querySelector('.gmnoprint.gm-bundled-control.gm-bundled-control-on-bottom .gmnoprint');
+                        var zoomWrapperWidth = 67;
+                        var elementHeight = 30;
+                        switch (this.fontSize) {
+                            case 'm':
+                                break;
+                            case 'l':
+                                zoomWrapperWidth = 90;
+                                elementHeight = 30;
+                                break;
+                            case 'xl':
+                                zoomWrapperWidth = 100;
+                                elementHeight = 30;
+                                break;
+                            default:
+                                break;
+                        }
+                        gmnoprintWrapper.childNodes[0].style.width = zoomWrapperWidth + 'px';
+
+
+                        //Zoom in
+                        var nodeIn = document.createElement('div');
+                        nodeIn.className = 'text';
+                        nodeIn.appendChild(document.createTextNode('Vergrößern'));
+                        gmnoprintWrapper.childNodes[0].childNodes[0].childNodes[0].childNodes[0].style.display = 'none'; //hide icon
+                        gmnoprintWrapper.childNodes[0].childNodes[0].childNodes[0].appendChild(nodeIn);
+                        gmnoprintWrapper.childNodes[0].childNodes[0].childNodes[0].style.width = zoomWrapperWidth + 'px';
+                        gmnoprintWrapper.childNodes[0].childNodes[0].childNodes[0].style.height = elementHeight + 'px';
+                        gmnoprintWrapper.childNodes[0].childNodes[0].style.width = zoomWrapperWidth + 'px';
+
+
+                        //Zoom out
+                        var nodeOut = document.createElement('div');
+                        var test = document.createElement('div');
+                        test.innerHTML = '<i class="fa fa-camera-retro"></i>';
+
+                        nodeOut.className = 'text';
+                        nodeOut.appendChild(document.createTextNode('Verkleinern'));
+                        nodeOut.appendChild(test);
+                        gmnoprintWrapper.childNodes[0].childNodes[2].childNodes[0].childNodes[0].style.display = 'none'; //hide icon
+                        gmnoprintWrapper.childNodes[0].childNodes[2].childNodes[0].appendChild(nodeOut);
+                        gmnoprintWrapper.childNodes[0].childNodes[2].childNodes[0].style.width = zoomWrapperWidth + 'px';
+                        gmnoprintWrapper.childNodes[0].childNodes[2].childNodes[0].style.height = elementHeight + 'px';
+                        gmnoprintWrapper.childNodes[0].childNodes[2].style.width = zoomWrapperWidth + 'px';
+
+                        break;
+
+                    default:
+                }
+            }.bind(this));
         }
-
-
 
     });
 
