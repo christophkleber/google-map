@@ -300,6 +300,7 @@ If you're seeing the message "You have included the Google Maps API multiple tim
                 value: false,
                 observer: '_disableZoomChanged'
             },
+            /*PROPERTIES USED FOR ADAPTIVITY*/
             moreContrast: {
                 type: Boolean,
                 value: false
@@ -308,7 +309,7 @@ If you're seeing the message "You have included the Google Maps API multiple tim
                 type: String,
                 value: 'm'
             },
-            fontFamily: {
+            fontStyle: {
                 type: String
             },
             readingDirection: {
@@ -479,13 +480,8 @@ If you're seeing the message "You have included the Google Maps API multiple tim
             this._updateMarkers();
             this._updateObjects();
             this._addMapListeners();
-            this._changeTextAlternatives();
 
-            this._changeFontSize();
-            this._changeFontStyle();
-            this._changeReadingDirection();
-
-
+            this._adaptive();
 
             this.fire('google-map-ready');
 
@@ -496,7 +492,6 @@ If you're seeing the message "You have included the Google Maps API multiple tim
         },
 
         _getMapOptions: function() {
-
             var mapOptions = {
                 zoom: this.zoom,
                 tilt: this.noAutoTilt ? 0 : 45,
@@ -506,6 +501,9 @@ If you're seeing the message "You have included the Google Maps API multiple tim
                 streetViewControl: !this.disableDefaultUi && !this.disableStreetViewControl,
                 disableDoubleClickZoom: this.disableZoom,
                 scrollwheel: !this.disableZoom,
+                /**
+                 * Styles are based on _changeContrast
+                 */
                 styles: this._changeContrast(),
                 maxZoom: Number(this.maxZoom),
                 minZoom: Number(this.minZoom)
@@ -824,7 +822,9 @@ If you're seeing the message "You have included the Google Maps API multiple tim
             google.maps.event.addListener(this.map, 'zoom_changed', function() {
                 this.zoom = this.map.getZoom();
             }.bind(this));
-
+            /**
+             * Adjustst position of elements again when idle
+             */
             google.maps.event.addListener(this.map, 'idle', function() {
                 console.log('idle');
                 switch (this.readingDirection){
@@ -879,88 +879,144 @@ If you're seeing the message "You have included the Google Maps API multiple tim
             }
         },
         /**
-         * _changeContrast - Changes style of Google Map, depending on moreContrast value
+         * _adaptive - execute all methods to provide adaptivity.
          *
          */
+        _adaptive: function(){
+            if (this.map) {
+                this.map.setOptions({styles: this._changeContrast()});
+            }
+            this._changeTextAlternatives();
+            this._changeFontSize();
+            this._changeFontStyle();
+            this._changeReadingDirection();
+        },
+        /**
+         * _changeContrast - Changes style of Google Map
+         * Based on value of moreContrast (true, false)
+         *
+         * @return {object} The styles values
+         */
         _changeContrast: function () {
-            var mystyles;
+            var gmapstyles;
             if(this.moreContrast){
-                console.log('more contrast');
-                mystyles = [{
-                    featureType: 'water',
-                    stylers: [
-                        {'color': '#004d99'}
-                    ]},{
-                    featureType: 'landscape',
-                    stylers: [
-                        {'color': '#000000'}
-                    ]},{
-                    featureType: 'road',
-                    stylers: [
-                        {'color': '#ffffff'}
-                    ]},{
-                    featureType: 'road',
-                    elementType: 'labels.text.stroke',
-                    stylers: [
-                        {'color': '#00cc00'}
-                    ]},{
-                    featureType: 'road',
-                    elementType: 'labels.text.fill',
-                    stylers: [
-                        {'color': '#000000'}
-                    ]},{
-                    featureType: 'transit',
-                    stylers: [
-                        {'color': '#ffffff' }
-                    ]},{
-                    featureType: 'poi',
-                    stylers: [
-                        {'visibility': 'off'}
-                    ]},{
-                    featureType: 'administrative',
-                    elementType: 'labels.text.stroke',
-                    stylers: [
-                        {'color': '#ffff00'}
-                    ]},{
-                    featureType: 'administrative',
-                    elementType: 'labels.text.fill',
-                    stylers: [
-                        {'color': '#000000'}
-                    ]},{
-                    featureType: 'transit',
-                    elementType: 'labels.text.stroke',
-                    stylers: [
-                        {'color': '#ff6666'}
-                    ]},{
-                    featureType: 'transit',
-                    elementType: 'labels.text.fill',
-                    stylers: [
-                        {'color': '#000000'}
-                    ]},{
-                    featureType: 'transit',
-                    elementType: 'labels.icon',
-                    stylers: [
-                        {'color': '#ff6666'}
-                    ]},{
-                    featureType: 'transit',
-                    elementType: 'labels.text.stroke',
-                    stylers: [
-                        {'color': '#000000'}
-                    ]}
-                ];
-                console.log(mystyles);
+                gmapstyles =
+                        [
+                            {
+                                "featureType": "administrative",
+                                "elementType": "labels.text.fill",
+                                "stylers": [
+                                    {
+                                        "color": "#000000"
+                                    }
+                                ]
+                            },
+                            {
+                                "featureType": "administrative",
+                                "elementType": "labels.text.stroke",
+                                "stylers": [
+                                    {
+                                        "color": "#ffff00"
+                                    }
+                                ]
+                            },
+                            {
+                                "featureType": "landscape",
+                                "stylers": [
+                                    {
+                                        "color": "#000000"
+                                    }
+                                ]
+                            },
+                            {
+                                "featureType": "poi",
+                                "stylers": [
+                                    {
+                                        "visibility": "off"
+                                    }
+                                ]
+                            },
+                            {
+                                "featureType": "road",
+                                "elementType": "geometry",
+                                "stylers": [
+                                    {
+                                        "color": "#ffffff"
+                                    }
+                                ]
+                            },
+                            {
+                                "featureType": "road",
+                                "elementType": "labels.icon",
+                                "stylers": [
+                                    {
+                                        "visibility": "simplified"
+                                    }
+                                ]
+                            },
+                            {
+                                "featureType": "road",
+                                "elementType": "labels.text.fill",
+                                "stylers": [
+                                    {
+                                        "color": "#000000"
+                                    }
+                                ]
+                            },
+                            {
+                                "featureType": "road",
+                                "elementType": "labels.text.stroke",
+                                "stylers": [
+                                    {
+                                        "color": "#00cc00"
+                                    }
+                                ]
+                            },
+                            {
+                                "featureType": "transit",
+                                "stylers": [
+                                    {
+                                        "color": "#ffffff"
+                                    }
+                                ]
+                            },
+                            {
+                                "featureType": "transit",
+                                "elementType": "labels.text.fill",
+                                "stylers": [
+                                    {
+                                        "color": "#000000"
+                                    }
+                                ]
+                            },
+                            {
+                                "featureType": "transit",
+                                "elementType": "labels.text.stroke",
+                                "stylers": [
+                                    {
+                                        "color": "#ff6666"
+                                    }
+                                ]
+                            },
+                            {
+                                "featureType": "water",
+                                "stylers": [
+                                    {
+                                        "color": "#004d99"
+                                    }
+                                ]
+                            }
+                        ];
             }
             else {
-                mystyles = this.styles;
-                console.log("not more Contrast");
+                gmapstyles = this.styles;
             }
-            return mystyles;
+            return gmapstyles;
         },
 
         /**
          * _changeFontSize - Changes the font size of text elements of Google Map
-         *                   depending on fontSize (m, l or xl)
-         *
+         * Based on value of fontSize (m, l, xl)
          */
         _changeFontSize: function () {
             google.maps.event.addListenerOnce(this.map, 'tilesloaded', function(){
@@ -985,8 +1041,6 @@ If you're seeing the message "You have included the Google Maps API multiple tim
                         document.querySelectorAll('#map .gmnoprint')[0].style.right = 407 + 'px';
                         document.querySelectorAll('#map .gmnoprint')[0].style.width = 210 + 'px';
                         document.querySelectorAll('#map .gmnoprint')[1].style.right = 235 + 'px';
-
-
                         break;
                     default:
                         break;
@@ -1002,23 +1056,17 @@ If you're seeing the message "You have included the Google Maps API multiple tim
                 var zoomTexts = document.querySelectorAll('.text');
                 console.log(zoomTexts);
                 for (i = 0; i < zoomTexts.length; i++) {
-                    console.log('nummer:' +i);
                     zoomTexts[i].style.fontSize = bigText + 'px';
                 }
-
-
-                console.log('changedFontSize');
-
             }.bind(this));
         },
         /**
          * _changeFontStyle - Changes the font to serif or sans serif
-         *                   depending on fontFamily
-         *
+         * Based on value of fontStyle (serif)
          */
         _changeFontStyle: function () {
             google.maps.event.addListenerOnce(this.map, 'tilesloaded', function(){
-                if (this.fontFamily == 'serif'){
+                if (this.fontStyle == 'serif'){
                     console.log('changeFont');
                     // Card and Satellite Text
                     document.querySelectorAll('#map .gmnoprint .gm-style-mtc > div:first-child')[0].style.fontFamily = '"Times New Roman", Times, serif';
@@ -1038,20 +1086,17 @@ If you're seeing the message "You have included the Google Maps API multiple tim
         },
         /**
          * _changeReadingDirection - Changes the web components texts and arrangemente
-         *                   depending on readingDirection (ltr, rtl)
-         *
+         * Based on value of readingDirection (ltr, rtl)
          */
         _changeReadingDirection: function () {
-            google.maps.event.addListenerOnce(this.map, 'tilesloaded', function(){
+            google.maps.event.addListener(this.map, 'tilesloaded', function(){
                 switch (this.readingDirection){
                     case 'ltr':
-                        console.log('ltr');
                         break;
                     case 'rtl':
-                        console.log('rtl');
                         //Streetview, Zoom Settings
                         document.querySelector('.gmnoprint.gm-bundled-control.gm-bundled-control-on-bottom').style.right = 'auto';
-                        document.querySelector('.gmnoprint.gm-bundled-control.gm-bundled-control-on-bottom + .gmnoprint').style.left = 0 + 'px';
+//                        document.querySelector('.gmnoprint.gm-bundled-control.gm-bundled-control-on-bottom + .gmnoprint').style.left = 0 + 'px';
                         //Card, Satellite Settings
                         document.querySelector('.gmnoprint.gm-bundled-control.gm-bundled-control-on-bottom + .gmnoprint').style.left = 'auto';
                         document.querySelector('.gmnoprint.gm-bundled-control.gm-bundled-control-on-bottom + .gmnoprint').style.right = 0 + 'px';
@@ -1060,28 +1105,24 @@ If you're seeing the message "You have included the Google Maps API multiple tim
 
             }.bind(this));
 
+
         },
         /**
          * _changeTextAlternatives - Changes the web components texts or symbols
-         *                   depending on textAlternatives(symbol, text)
-         *
+         * Based on value of textAlternatives (symbol, text)
          */
         _changeTextAlternatives: function () {
             google.maps.event.addListenerOnce(this.map, 'tilesloaded', function(){
                 switch (this.textAlternatives) {
                     case 'symbol':
-                        console.log('symbol');
                         // Card and Satellite Text
                         document.querySelectorAll('#map .gmnoprint .gm-style-mtc > div:first-child')[0].innerHTML = '<i class="fa fa-map"></i>';
                         document.querySelectorAll('#map .gmnoprint .gm-style-mtc > div:first-child')[1].innerHTML = '<i class="fa fa-globe"></i>';
                         break;
                     case 'text':
-                        console.log('text');
                         if(this.readingDirection == 'ltr'){
                             document.querySelector('.gmnoprint.gm-bundled-control.gm-bundled-control-on-bottom').style.right = '105px';
-
                         }
-
                         var gmnoprintWrapper = document.querySelector('.gmnoprint.gm-bundled-control.gm-bundled-control-on-bottom .gmnoprint');
                         var zoomWrapperWidth = 67;
                         var elementHeight = 30;
@@ -1100,7 +1141,6 @@ If you're seeing the message "You have included the Google Maps API multiple tim
                                 break;
                         }
                         gmnoprintWrapper.childNodes[0].style.width = zoomWrapperWidth + 'px';
-
 
                         //Zoom in
                         var nodeIn = document.createElement('div');
@@ -1135,5 +1175,4 @@ If you're seeing the message "You have included the Google Maps API multiple tim
         }
 
     });
-
 </script>
