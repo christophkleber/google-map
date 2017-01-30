@@ -1126,27 +1126,77 @@ If you're seeing the message "You have included the Google Maps API multiple tim
                         if (!gmnoprintWrapper.childNodes[0].childNodes[0].childNodes[0].childNodes[1]){
                             var nodeIn = document.createElement('div');
                             nodeIn.className = 'text';
-                            nodeIn.appendChild(document.createTextNode('Vergrößern'));
+                            nodeIn.appendChild(document.createTextNode('zoom in'));
                             gmnoprintWrapper.childNodes[0].childNodes[0].childNodes[0].appendChild(nodeIn);
                         }
                         gmnoprintWrapper.childNodes[0].childNodes[0].childNodes[0].childNodes[0].style.display = 'none'; //hide icon
                         gmnoprintWrapper.childNodes[0].childNodes[0].childNodes[0].style.width = zoomWrapperWidth + 'px';
                         gmnoprintWrapper.childNodes[0].childNodes[0].childNodes[0].style.height = elementHeight + 'px';
                         gmnoprintWrapper.childNodes[0].childNodes[0].style.width = zoomWrapperWidth + 'px';
+
+
                         /*ZOOM OUT*/
                         if (!gmnoprintWrapper.childNodes[0].childNodes[2].childNodes[0].childNodes[1]){
                             var nodeOut = document.createElement('div');
                             nodeOut.className = 'text';
-                            nodeOut.appendChild(document.createTextNode('Verkleinern'));
+                            nodeOut.appendChild(document.createTextNode('zoom out'));
                             gmnoprintWrapper.childNodes[0].childNodes[2].childNodes[0].appendChild(nodeOut);
                         }
                         gmnoprintWrapper.childNodes[0].childNodes[2].childNodes[0].childNodes[0].style.display = 'none'; //hide icon
                         gmnoprintWrapper.childNodes[0].childNodes[2].childNodes[0].style.width = zoomWrapperWidth + 'px';
                         gmnoprintWrapper.childNodes[0].childNodes[2].childNodes[0].style.height = elementHeight + 'px';
                         gmnoprintWrapper.childNodes[0].childNodes[2].style.width = zoomWrapperWidth + 'px';
+
                         break;
+
                     default:
-                        break;
+                }
+            }.bind(this));
+            google.maps.event.addListener(this.map, 'mouseout', function(){
+                if (this.textAlternatives == 'text') {
+                    if(this.readingDirection == 'ltr'){
+                        document.querySelector('.gmnoprint.gm-bundled-control.gm-bundled-control-on-bottom').style.right = '105px';
+                    }
+                    var gmnoprintWrapper = document.querySelector('.gmnoprint.gm-bundled-control.gm-bundled-control-on-bottom .gmnoprint');
+                    var zoomWrapperWidth = 67;
+                    var elementHeight = 30;
+                    switch (this.fontSize) {
+                        case 'm':
+                            break;
+                        case 'l':
+                            zoomWrapperWidth = 90;
+                            elementHeight = 30;
+                            break;
+                        case 'xl':
+                            zoomWrapperWidth = 100;
+                            elementHeight = 30;
+                            break;
+                        default:
+                            break;
+                    }
+                    gmnoprintWrapper.childNodes[0].style.width = zoomWrapperWidth + 'px';
+                    /*ZOOM IN*/
+                    if (!gmnoprintWrapper.childNodes[0].childNodes[0].childNodes[0].childNodes[1]){
+                        var nodeIn = document.createElement('div');
+                        nodeIn.className = 'text';
+                        nodeIn.appendChild(document.createTextNode('Vergrößern'));
+                        gmnoprintWrapper.childNodes[0].childNodes[0].childNodes[0].appendChild(nodeIn);
+                    }
+                    gmnoprintWrapper.childNodes[0].childNodes[0].childNodes[0].childNodes[0].style.display = 'none'; //hide icon
+                    gmnoprintWrapper.childNodes[0].childNodes[0].childNodes[0].style.width = zoomWrapperWidth + 'px';
+                    gmnoprintWrapper.childNodes[0].childNodes[0].childNodes[0].style.height = elementHeight + 'px';
+                    gmnoprintWrapper.childNodes[0].childNodes[0].style.width = zoomWrapperWidth + 'px';
+                    /*ZOOM OUT*/
+                    if (!gmnoprintWrapper.childNodes[0].childNodes[2].childNodes[0].childNodes[1]){
+                        var nodeOut = document.createElement('div');
+                        nodeOut.className = 'text';
+                        nodeOut.appendChild(document.createTextNode('Verkleinern'));
+                        gmnoprintWrapper.childNodes[0].childNodes[2].childNodes[0].appendChild(nodeOut);
+                    }
+                    gmnoprintWrapper.childNodes[0].childNodes[2].childNodes[0].childNodes[0].style.display = 'none'; //hide icon
+                    gmnoprintWrapper.childNodes[0].childNodes[2].childNodes[0].style.width = zoomWrapperWidth + 'px';
+                    gmnoprintWrapper.childNodes[0].childNodes[2].childNodes[0].style.height = elementHeight + 'px';
+                    gmnoprintWrapper.childNodes[0].childNodes[2].style.width = zoomWrapperWidth + 'px';
                 }
             }.bind(this));
         }
